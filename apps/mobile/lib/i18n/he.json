@@ -1,0 +1,35 @@
+{
+  "home": {
+    "title": "ארץ עיר",
+    "create": "צור משחק",
+    "join": "הצטרף למשחק"
+  },
+  "lobby": {
+    "waitingForHost": "ממתין למארח להתחיל…",
+    "startGame": "התחל משחק",
+    "players": "שחקנים"
+  },
+  "play": {
+    "imDone": "סיימתי",
+    "filled": "{{count}} / {{total}} מולא"
+  },
+  "review": {
+    "next": "הבא",
+    "challenge": "ערעור"
+  },
+  "results": {
+    "playAgain": "שחק שוב",
+    "home": "בית"
+  },
+  "categories": {
+    "country": "מדינה",
+    "city": "עיר",
+    "animal": "חיה",
+    "plant": "צמח",
+    "inanimate": "חפץ דומם",
+    "boy": "שם פרטי לזכר",
+    "girl": "שם פרטי לנקבה",
+    "famous_person": "אדם מפורסם",
+    "profession": "מקצוע"
+  }
+}

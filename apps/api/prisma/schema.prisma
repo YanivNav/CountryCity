@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  displayName String
+  avatarColor String
+  createdAt   DateTime @default(now())
+
+  hostedRooms Room[]       @relation("HostedRooms")
+  memberships RoomMember[]
+  answers     Answer[]
+  scores      Score[]
+}
+
+model Room {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  hostId       String
+  host         User      @relation("HostedRooms", fields: [hostId], references: [id])
+  phase        GamePhase @default(WAITING)
+  currentRound Int       @default(0)
+  settings     Json
+  createdAt    DateTime  @default(now())
+  closedAt     DateTime?
+
+  members RoomMember[]
+  rounds  Round[]
+  scores  Score[]
+}
+
+model RoomMember {
+  roomId   String
+  userId   String
+  room     Room     @relation(fields: [roomId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  joinedAt DateTime @default(now())
+  isReady  Boolean  @default(false)
+
+  @@id([roomId, userId])
+}
+
+model Round {
+  id          String    @id @default(uuid())
+  roomId      String
+  room        Room      @relation(fields: [roomId], references: [id])
+  roundNumber Int
+  letter      String    @db.Char(1)
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+
+  answers Answer[]
+}
+
+model Answer {
+  id               String           @id @default(uuid())
+  roundId          String
+  round            Round            @relation(fields: [roundId], references: [id])
+  userId           String
+  user             User             @relation(fields: [userId], references: [id])
+  category         String
+  values           String[]
+  acceptedValue    String?
+  score            Int?
+  validationStatus ValidationStatus @default(PENDING)
+  submittedAt      DateTime         @default(now())
+
+  @@unique([roundId, userId, category])
+}
+
+model Score {
+  roomId       String
+  userId       String
+  room         Room   @relation(fields: [roomId], references: [id])
+  user         User   @relation(fields: [userId], references: [id])
+  totalPoints  Int    @default(0)
+  roundsPlayed Int    @default(0)
+
+  @@id([roomId, userId])
+}
+
+enum GamePhase {
+  WAITING
+  ROLLING
+  PLAYING
+  REVIEWING
+  FINISHED
+}
+
+enum ValidationStatus {
+  PENDING
+  VALID
+  INVALID
+  CHALLENGED
+}

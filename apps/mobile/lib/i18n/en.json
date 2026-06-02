@@ -1,0 +1,35 @@
+{
+  "home": {
+    "title": "Country City",
+    "create": "Create Game",
+    "join": "Join Game"
+  },
+  "lobby": {
+    "waitingForHost": "Waiting for host to start…",
+    "startGame": "Start Game",
+    "players": "Players"
+  },
+  "play": {
+    "imDone": "I'm Done",
+    "filled": "{{count}} / {{total}} filled"
+  },
+  "review": {
+    "next": "Next",
+    "challenge": "Challenge"
+  },
+  "results": {
+    "playAgain": "Play Again",
+    "home": "Home"
+  },
+  "categories": {
+    "country": "Country",
+    "city": "City",
+    "animal": "Animal",
+    "plant": "Plant",
+    "inanimate": "Inanimate object",
+    "boy": "Boy's name",
+    "girl": "Girl's name",
+    "famous_person": "Famous person",
+    "profession": "Profession"
+  }
+}

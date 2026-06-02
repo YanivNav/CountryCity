@@ -1,0 +1,17 @@
+{
+  "name": "country-city",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "expo": "~54.0.0"
+  },
+  "scripts": {
+    "mobile": "npm run start --workspace=apps/mobile",
+    "api": "npm run start:dev --workspace=apps/api",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build": "npm run build:shared && npm run build --workspaces --if-present"
+  }
+}
