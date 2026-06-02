@@ -1,4 +1,5 @@
 import { Share } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Box,
@@ -27,6 +28,8 @@ const BRAND_HEX = '#3D2FCF';
 export default function LobbyScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const router   = useRouter();
+  const [copiedCode, setCopiedCode] = useState(false);
+  const copiedResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const room  = useGameStore((s) => s.room);
   const myId  = useUserStore((s) => s.id);
@@ -35,8 +38,26 @@ export default function LobbyScreen() {
   const isHost   = room?.hostId === myId;
   const canStart = isHost && players.length >= 2;
 
+  useEffect(() => {
+    return () => {
+      if (copiedResetTimer.current) {
+        clearTimeout(copiedResetTimer.current);
+      }
+    };
+  }, []);
+
   async function copyCode() {
     await Clipboard.setStringAsync(code ?? '');
+    setCopiedCode(true);
+
+    if (copiedResetTimer.current) {
+      clearTimeout(copiedResetTimer.current);
+    }
+
+    copiedResetTimer.current = setTimeout(() => {
+      setCopiedCode(false);
+      copiedResetTimer.current = null;
+    }, 1400);
   }
 
   async function shareRoom() {
@@ -118,7 +139,7 @@ export default function LobbyScreen() {
                 sx={{ ':active': { bg: '$primary50' } }}
               >
                 <ButtonText color={BRAND} fontWeight="$semibold">
-                  📋  Copy
+                  {copiedCode ? '📋 Copied!' : '📋 Copy'}
                 </ButtonText>
               </Button>
 

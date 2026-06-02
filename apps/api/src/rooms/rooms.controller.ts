@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -15,7 +25,11 @@ export class RoomsController {
 
   @Get(':code')
   findByCode(@Param('code') code: string) {
-    return this.roomsService.findByCode(code);
+    const room = this.roomsService.findByCode(code.toUpperCase());
+    if (!room) {
+      throw new NotFoundException('Room not found.');
+    }
+    return room;
   }
 
   @Patch(':code/settings')

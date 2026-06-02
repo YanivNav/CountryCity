@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Platform } from 'react-native';
+import { Modal, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Box,
@@ -22,7 +22,7 @@ import {
   ScrollView,
 } from '@gluestack-ui/themed';
 import { loginAnonymous } from '../lib/auth';
-import { createRoom } from '../lib/api';
+import { createRoom, getRoom } from '../lib/api';
 import { useUserStore } from '../stores/userStore';
 import { MAX_CONTENT_WIDTH, SCREEN_H_PAD } from '../lib/layout';
 
@@ -32,6 +32,10 @@ export default function HomeScreen() {
 
   const [name, setName]       = useState('');
   const [creating, setCreating] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
+  const [roomCodeError, setRoomCodeError] = useState<string | null>(null);
   const [error, setError]     = useState<string | null>(null);
 
   async function handleCreateGame() {
@@ -53,8 +57,49 @@ export default function HomeScreen() {
   }
 
   function handleJoinGame() {
+    const trimmed = name.trim();
+    if (!trimmed) { setError('Please enter a display name.'); return; }
     setError(null);
-    router.push({ pathname: '/join', params: { name: name.trim() } });
+    setRoomCode('');
+    setRoomCodeError(null);
+    setJoinModalOpen(true);
+  }
+
+  async function handleJoinRoom() {
+    const trimmedName = name.trim();
+    const normalizedCode = roomCode.trim().toUpperCase();
+
+    if (!trimmedName) {
+      setJoinModalOpen(false);
+      setError('Please enter a display name.');
+      return;
+    }
+
+    if (!normalizedCode) {
+      setRoomCodeError('Please enter a room code.');
+      return;
+    }
+
+    setRoomCodeError(null);
+    setJoining(true);
+    try {
+      const { token, user } = await loginAnonymous(trimmedName);
+      setUser(user);
+      setToken(token);
+
+      const room = await getRoom(normalizedCode, token);
+      if (room.phase !== 'waiting') {
+        setRoomCodeError('This game has already started.');
+        return;
+      }
+
+      setJoinModalOpen(false);
+      router.push(`/room/${room.code}/lobby`);
+    } catch (err: unknown) {
+      setRoomCodeError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setJoining(false);
+    }
   }
 
   return (
@@ -135,7 +180,7 @@ export default function HomeScreen() {
                 borderRadius="$xl"
                 variant="outline"
                 borderColor="$primary500"
-                isDisabled={creating}
+                isDisabled={creating || joining}
                 onPress={handleJoinGame}
                 sx={{ ':active': { bg: '$primary50' } }}
               >
@@ -148,6 +193,100 @@ export default function HomeScreen() {
           </VStack>
         </Box>
       </ScrollView>
+
+      <Modal
+        visible={joinModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!joining) setJoinModalOpen(false);
+        }}
+      >
+        <Box
+          flex={1}
+          bg="rgba(0, 0, 0, 0.42)"
+          px={SCREEN_H_PAD}
+          justifyContent="center"
+        >
+          <Box
+            bg="$white"
+            borderRadius="$xl"
+            p="$5"
+            style={{ maxWidth: MAX_CONTENT_WIDTH, width: '100%', alignSelf: 'center' }}
+          >
+            <VStack space="lg">
+              <VStack space="xs">
+                <Heading size="lg" color="$textLight900">
+                  Join Game
+                </Heading>
+                <Text size="sm" color="$textLight500">
+                  Enter the room code your friend shared.
+                </Text>
+              </VStack>
+
+              <FormControl isInvalid={!!roomCodeError}>
+                <FormControlLabel mb="$1">
+                  <FormControlLabelText fontWeight="$semibold">
+                    Room code
+                  </FormControlLabelText>
+                </FormControlLabel>
+
+                <Input size="lg" borderRadius="$xl" borderColor="$borderLight200">
+                  <InputField
+                    placeholder="ABC123"
+                    value={roomCode}
+                    onChangeText={(v) => {
+                      setRoomCode(v.toUpperCase());
+                      setRoomCodeError(null);
+                    }}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    maxLength={8}
+                    returnKeyType="join"
+                    onSubmitEditing={handleJoinRoom}
+                    bg="$white"
+                  />
+                </Input>
+
+                <FormControlError>
+                  <FormControlErrorIcon as={AlertCircleIcon} />
+                  <FormControlErrorText>{roomCodeError}</FormControlErrorText>
+                </FormControlError>
+              </FormControl>
+
+              <VStack space="sm">
+                <Button
+                  size="lg"
+                  borderRadius="$xl"
+                  bg="$primary500"
+                  isDisabled={joining}
+                  onPress={handleJoinRoom}
+                  sx={{ ':active': { bg: '$primary600' }, ':disabled': { opacity: 0.55 } }}
+                >
+                  {joining
+                    ? <ButtonSpinner color="$white" />
+                    : <ButtonText fontWeight="$bold">Join Lobby</ButtonText>
+                  }
+                </Button>
+
+                <Button
+                  size="lg"
+                  borderRadius="$xl"
+                  variant="outline"
+                  borderColor="$borderLight300"
+                  isDisabled={joining}
+                  onPress={() => setJoinModalOpen(false)}
+                  sx={{ ':active': { bg: '$backgroundLight100' } }}
+                >
+                  <ButtonText color="$textLight600" fontWeight="$semibold">
+                    Cancel
+                  </ButtonText>
+                </Button>
+              </VStack>
+            </VStack>
+          </Box>
+        </Box>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

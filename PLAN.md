@@ -669,7 +669,6 @@ apps/mobile/
 │   ├── _layout.tsx                   # Root layout — auth provider, theme
 │   ├── index.tsx                     # Home screen
 │   ├── create.tsx                    # Create room + settings
-│   ├── join.tsx                      # Join by code
 │   ├── profile.tsx                   # Display name, avatar, history
 │   └── room/
 │       └── [code]/

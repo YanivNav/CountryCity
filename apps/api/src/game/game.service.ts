@@ -14,7 +14,11 @@ export class GameService {
   ) {}
 
   async joinRoom(client: Socket, roomCode: string, _server: Server) {
-    const user = client.data.user as { id: string; displayName: string; avatarColor: string };
+    const user = client.data.user as {
+      id: string;
+      displayName: string;
+      avatarColor: string;
+    };
     const room = this.rooms.findByCode(roomCode);
 
     if (!room) {

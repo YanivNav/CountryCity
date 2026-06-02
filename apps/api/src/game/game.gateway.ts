@@ -21,10 +21,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly gameService: GameService,
   ) {}
 
-  async handleConnection(client: Socket) {
+  handleConnection(client: Socket) {
     const token = client.handshake.auth?.token as string;
-    const user = token ? await this.authService.verifyToken(token) : null;
-    if (!user) { client.disconnect(); return; }
+    const user = token ? this.authService.verifyToken(token) : null;
+    if (!user) {
+      client.disconnect();
+      return;
+    }
     client.data.user = user;
   }
 
@@ -33,7 +36,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(EVENTS.ROOM_JOIN)
-  handleJoin(@ConnectedSocket() client: Socket, @MessageBody() payload: { roomCode: string }) {
+  handleJoin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { roomCode: string },
+  ) {
     return this.gameService.joinRoom(client, payload.roomCode, this.server);
   }
 
@@ -55,7 +61,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(EVENTS.ANSWERS_SUBMIT)
   handleSubmit(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { answers: { category: string; values: string[] }[] },
+    @MessageBody()
+    payload: { answers: { category: string; values: string[] }[] },
   ) {
     return this.gameService.submitAnswers(client, payload.answers);
   }
@@ -66,8 +73,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(EVENTS.REVIEW_CHALLENGE)
-  handleChallenge(@ConnectedSocket() client: Socket, @MessageBody() payload: { answerId: string }) {
-    return this.gameService.challengeAnswer(client, payload.answerId, this.server);
+  handleChallenge(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { answerId: string },
+  ) {
+    return this.gameService.challengeAnswer(
+      client,
+      payload.answerId,
+      this.server,
+    );
   }
 
   @SubscribeMessage(EVENTS.PLAY_AGAIN)

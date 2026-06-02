@@ -1,4 +1,7 @@
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
+import type { Room } from '@country-city/shared';
+import { getApiBaseUrl } from './serverUrl';
+
+const BASE = getApiBaseUrl();
 const DEFAULT_TIMEOUT_MS = 8_000;
 
 export async function apiFetch<T>(
@@ -9,9 +12,12 @@ export async function apiFetch<T>(
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const url = `${BASE}${path}`;
 
   try {
-    const res = await fetch(`${BASE}${path}`, {
+    console.log('[apiFetch]', url);
+
+    const res = await fetch(url, {
       ...rest,
       signal: controller.signal,
       headers: {
@@ -38,7 +44,9 @@ export async function apiFetch<T>(
 
     return res.json() as Promise<T>;
   } catch (err) {
+    console.log(err);
     if (err instanceof Error) {
+      console.log(JSON.stringify(err.message));
       if (err.name === 'AbortError' || err instanceof TypeError) {
         throw new Error('Cannot reach the server, please try again later.');
       }
@@ -54,4 +62,8 @@ export async function createRoom(token: string) {
     method: 'POST',
     token,
   });
+}
+
+export async function getRoom(code: string, token: string) {
+  return apiFetch<Room>(`/rooms/${code}`, { token });
 }
