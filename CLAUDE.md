@@ -13,6 +13,7 @@ See [PLAN.md](./PLAN.md) for the full product spec, data model, API contract, an
 - All socket event names come from `EVENTS` in `@country-city/shared`
 - Game state machine lives entirely server-side (no trust of client phase transitions)
 - Scoring is calculated server-side in `ScoringService`
+- **State persistence:** live game state (rooms, rounds, answers, countdowns, scores) is held **in memory** — `RoomsService` keeps a `Map`, and `GameService` keeps per-room runtime. The Prisma schema in `PLAN.md §5` is **not** used for in-progress games; DB writes are deferred to **Phase 5** (profiles, history). Trade-off: a server restart drops active games — acceptable for a party game. Don't add Prisma calls to the live game loop without revisiting this.
 - Use `npx expo install <pkg>` (not plain `npm install`) for any Expo-native package in `apps/mobile` to get SDK-compatible versions
 
 ## Running locally

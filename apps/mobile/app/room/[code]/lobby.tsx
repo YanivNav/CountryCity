@@ -20,6 +20,7 @@ import {
 import { useGameStore } from '../../../stores/gameStore';
 import { useUserStore } from '../../../stores/userStore';
 import { MAX_WIDE_WIDTH, SCREEN_H_PAD } from '../../../lib/layout';
+import { socketEmit } from '../../../lib/socket';
 import * as Clipboard from 'expo-clipboard';
 
 const BRAND = '$primary500';
@@ -227,7 +228,7 @@ export default function LobbyScreen() {
               borderRadius="$xl"
               bg={BRAND}
               isDisabled={!canStart}
-              onPress={() => { /* startGame — next phase */ }}
+              onPress={() => { if (canStart) socketEmit.startGame(); }}
               sx={{ ':active': { bg: '$primary600' }, ':disabled': { opacity: 0.45 } }}
             >
               <ButtonText fontWeight="$bold">Start Game</ButtonText>
