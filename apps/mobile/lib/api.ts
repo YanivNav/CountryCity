@@ -58,9 +58,21 @@ export async function apiFetch<T>(
 }
 
 export async function createRoom(token: string) {
-  return apiFetch<{ id: string; code: string; hostId: string }>('/rooms', {
+  return apiFetch<Room>('/rooms', {
     method: 'POST',
     token,
+  });
+}
+
+export async function updateRoomSettings(
+  code: string,
+  token: string,
+  settings: Partial<Room['settings']>,
+) {
+  return apiFetch<Room>(`/rooms/${code}/settings`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(settings),
   });
 }
 

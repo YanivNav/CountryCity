@@ -21,6 +21,7 @@ import { useGameStore } from '../../../stores/gameStore';
 import { useUserStore } from '../../../stores/userStore';
 import { MAX_WIDE_WIDTH, SCREEN_H_PAD } from '../../../lib/layout';
 import { socketEmit } from '../../../lib/socket';
+import { RoomSettingsModal } from '../../../components/game/RoomSettingsModal';
 import * as Clipboard from 'expo-clipboard';
 
 const BRAND = '$primary500';
@@ -31,6 +32,7 @@ export default function LobbyScreen() {
   const router   = useRouter();
   const [copiedCode, setCopiedCode] = useState(false);
   const copiedResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const room  = useGameStore((s) => s.room);
   const myId  = useUserStore((s) => s.id);
@@ -87,7 +89,13 @@ export default function LobbyScreen() {
             <Text size="2xl" color={BRAND}>←</Text>
           </Pressable>
           <Heading size="md" color="$textLight900">Lobby</Heading>
-          <Box w={40} />
+          {isHost ? (
+            <Pressable onPress={() => setSettingsOpen(true)} p="$2" mr={-8}>
+              <Text size="xl">⚙️</Text>
+            </Pressable>
+          ) : (
+            <Box w={40} />
+          )}
         </HStack>
       </Box>
 
@@ -247,6 +255,14 @@ export default function LobbyScreen() {
         </VStack>
       </Box>
 
+      {/* ── Settings modal (host only) ──────────────────────── */}
+      {room && (
+        <RoomSettingsModal
+          room={room}
+          visible={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </Box>
   );
 }
