@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Box,
@@ -32,6 +32,13 @@ export default function ResultsScreen() {
 
   const isHost = room?.hostId === myId;
 
+  // ── Prevent navigating away before the results have been shown ──
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
   // ── Expanded round breakdown per player ──
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -49,6 +56,7 @@ export default function ResultsScreen() {
 
   // ── Navigate back to lobby when host triggers Play Again ──
   useEffect(() => {
+    if (!mounted.current) return; // don't navigate on initial mount
     if (room?.phase === 'waiting') {
       router.replace(`/room/${code}/lobby`);
     }
@@ -231,7 +239,7 @@ export default function ResultsScreen() {
               size="lg"
               borderRadius="$xl"
               bg={BRAND}
-              onPress={() => socketEmit.playAgain()}
+              onPress={() => { socketEmit.playAgain(); router.replace(`/room/${code}/lobby`); }}
               sx={{ ':active': { bg: '$primary600' } }}
             >
               <ButtonText fontWeight="$bold">Play Again</ButtonText>

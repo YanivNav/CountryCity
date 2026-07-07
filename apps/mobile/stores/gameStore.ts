@@ -24,6 +24,7 @@ interface GameState {
   addAnswerSlot: (category: string) => void;
   setReviewCategory: (review: CategoryReview) => void;
   setFinalScores: (scores: FinalScore[]) => void;
+  clearScores: () => void;
   resetForNewRound: () => void;
 }
 
@@ -72,6 +73,7 @@ export const useGameStore = create<GameState>((set) => ({
   setReviewCategory: (review) =>
     set((s) => ({ currentCategoryReview: review, reviewIndex: s.reviewIndex + 1 })),
   setFinalScores: (scores) => set({ scores }),
+  clearScores: () => set({ scores: [] }),
   resetForNewRound: () =>
     set({ round: null, countdown: null, myAnswers: {}, reviewIndex: 0, currentCategoryReview: null }),
 }));

@@ -309,6 +309,34 @@ export class GameService {
     // an answer for a group decision; it has no effect until validation lands.
   }
 
+  finishGame(client: Socket, server: Server) {
+    const user = client.data.user as SocketUser;
+    const roomCode: string | undefined = client.data.roomCode;
+    const room = roomCode ? this.rooms.findByCode(roomCode) : undefined;
+    if (!room || !roomCode) return;
+
+    if (room.hostId !== user.id) {
+      client.emit(EVENTS.ERROR, { message: 'Only the host can finish the game' });
+      return;
+    }
+
+    const rt = this.getRuntime(roomCode);
+    this.clearCountdown(rt);
+    room.phase = 'finished';
+
+    const finalScores = rt.reviews.length
+      ? this.buildFinalScores(room, rt.reviews)
+      : room.players.map((p) => ({
+          userId: p.id,
+          displayName: p.displayName,
+          avatarColor: p.avatarColor,
+          totalPoints: 0,
+          roundBreakdown: [],
+        }));
+
+    server.to(roomCode).emit(EVENTS.GAME_FINISHED, finalScores);
+  }
+
   playAgain(client: Socket, server: Server) {
     const user = client.data.user as SocketUser;
     const roomCode: string | undefined = client.data.roomCode;

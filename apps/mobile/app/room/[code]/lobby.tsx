@@ -34,12 +34,19 @@ export default function LobbyScreen() {
   const copiedResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const room  = useGameStore((s) => s.room);
-  const myId  = useUserStore((s) => s.id);
+  const room   = useGameStore((s) => s.room);
+  const scores = useGameStore((s) => s.scores);
+  const myId   = useUserStore((s) => s.id);
 
   const players  = room?.players ?? [];
   const isHost   = room?.hostId === myId;
   const canStart = isHost && players.length >= 2;
+
+  // Score lookup from the most recent finished game
+  const scoreByUser: Record<string, number> = {};
+  for (const s of scores) {
+    scoreByUser[s.userId] = s.totalPoints;
+  }
 
   useEffect(() => {
     return () => {
@@ -210,6 +217,12 @@ export default function LobbyScreen() {
                           </BadgeText>
                         </Badge>
                       )}
+
+                      {scoreByUser[p.id] != null && (
+                        <Text size="sm" fontWeight="$extrabold" color="$primary500" minWidth={28} textAlign="right">
+                          {scoreByUser[p.id]}
+                        </Text>
+                      )}
                     </HStack>
                     {index < players.length - 1 && <Divider bg="$backgroundLight100" />}
                   </Box>
@@ -247,7 +260,20 @@ export default function LobbyScreen() {
             </Box>
           )}
 
-          {isHost && !canStart && (
+          {isHost && scores.length > 0 && (
+            <Button
+              size="lg"
+              borderRadius="$xl"
+              variant="outline"
+              borderColor="$red400"
+              onPress={() => socketEmit.finishGame()}
+              sx={{ ':active': { bg: '$red50' } }}
+            >
+              <ButtonText color="$red500" fontWeight="$semibold">Finish Game</ButtonText>
+            </Button>
+          )}
+
+          {isHost && !canStart && scores.length === 0 && (
             <Text size="sm" color="$textLight400" textAlign="center">
               Need at least 2 players to start
             </Text>

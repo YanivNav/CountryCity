@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Box,
   HStack,
@@ -21,9 +20,6 @@ const BRAND = '$primary500';
 const AUTO_ADVANCE_SEC = 6;
 
 export default function ReviewScreen() {
-  const { code } = useLocalSearchParams<{ code: string }>();
-  const router = useRouter();
-
   const room = useGameStore((s) => s.room);
   const round = useGameStore((s) => s.round);
   const phase = useGameStore((s) => s.phase);
@@ -66,12 +62,12 @@ export default function ReviewScreen() {
   const autoTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!review || !isHost) return;
+    // Only run during review, for the host, and only while we have a category
+    if (!review || !isHost || phase !== 'reviewing') return;
     setAutoSec(AUTO_ADVANCE_SEC);
     autoTimer.current = setInterval(() => {
       setAutoSec((prev) => {
         if (prev <= 1) {
-          // time's up — advance
           socketEmit.advanceReview();
           return AUTO_ADVANCE_SEC;
         }
@@ -81,14 +77,7 @@ export default function ReviewScreen() {
     return () => {
       if (autoTimer.current) clearInterval(autoTimer.current);
     };
-  }, [review, isHost]);
-
-  // ── Navigate to results when game finishes ──
-  useEffect(() => {
-    if (phase === 'finished') {
-      router.replace(`/room/${code}/results`);
-    }
-  }, [phase, code]);
+  }, [review, isHost, phase]);
 
   // ── Derived ──
   const currentCatIdx = reviewIndex - 1; // 0-based

@@ -8,6 +8,7 @@ export const EVENTS = {
   REVIEW_ADVANCE:   'review:advance',
   REVIEW_CHALLENGE: 'review:challenge',
   PLAY_AGAIN:       'game:play-again',
+  GAME_FINISH:      'game:finish',
 
   // Server → Client
   ROOM_STATE:       'room:state',

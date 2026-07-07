@@ -11,7 +11,7 @@ export default function RoomLayout() {
   const {
     setRoom, updatePlayer, removePlayer,
     setPhase, setRound, startCountdown,
-    setReviewCategory, setFinalScores,
+    setReviewCategory, setFinalScores, clearScores,
   } = useGameStore();
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function RoomLayout() {
     socket.on(EVENTS.PLAYER_LEFT, ({ userId }: { userId: string }) => removePlayer(userId));
 
     socket.on(EVENTS.GAME_STARTED, (data: Round) => {
+      clearScores();
       setRound(data);
       setPhase('rolling');
       router.replace(`/room/${code}/rolling`);

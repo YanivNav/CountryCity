@@ -88,4 +88,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handlePlayAgain(@ConnectedSocket() client: Socket) {
     return this.gameService.playAgain(client, this.server);
   }
+
+  @SubscribeMessage(EVENTS.GAME_FINISH)
+  handleFinishGame(@ConnectedSocket() client: Socket) {
+    return this.gameService.finishGame(client, this.server);
+  }
 }

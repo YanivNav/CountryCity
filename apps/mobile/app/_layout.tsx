@@ -22,9 +22,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="create" />
-        <Stack.Screen name="join" />
         <Stack.Screen name="profile" />
-        <Stack.Screen name="room" />
       </Stack>
     </GluestackUIProvider>
   );

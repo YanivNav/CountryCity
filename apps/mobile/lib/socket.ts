@@ -35,4 +35,5 @@ export const socketEmit = {
   challengeAnswer: (answerId: string) =>
     getSocket().emit(EVENTS.REVIEW_CHALLENGE, { answerId }),
   playAgain: () => getSocket().emit(EVENTS.PLAY_AGAIN),
+  finishGame: () => getSocket().emit(EVENTS.GAME_FINISH),
 };
